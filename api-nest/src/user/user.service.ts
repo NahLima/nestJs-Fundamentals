@@ -3,8 +3,7 @@ import { CreateUserDTO } from "./dto/create-user.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
 import { UpdatePatchtUserDTO } from "./dto/update-patch-user.dto";
-import e from "express";
-import { NotFoundError } from "rxjs";
+
 
 @Injectable()
 export class UserService {
@@ -35,7 +34,9 @@ export class UserService {
         return this.prisma.users.findMany()
     }
 
+
     async getOne(id: number) {
+
         await this.exists(id)
 
         return this.prisma.users.findUnique({
@@ -101,10 +102,14 @@ export class UserService {
         })
     }
 
+    async exists(id: number) {
+    const user = await this.prisma.users.findUnique({
+        where: { id },
+    });
 
-    async exists(id:number){
-        if (!(await this.getOne(id))){
-            throw new NotFoundException(`Usuario ${id} não existe`)
-        }
+    if (!user) {
+        throw new NotFoundException(`Usuario ${id} não existe`);
     }
+}
+
 }
