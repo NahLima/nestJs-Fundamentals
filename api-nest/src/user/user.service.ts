@@ -3,29 +3,45 @@ import { CreateUserDTO } from "./dto/create-user.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
 import { UpdatePatchtUserDTO } from "./dto/update-patch-user.dto";
-
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UserService {
     constructor(private prisma: PrismaService){}
 
-    async create({ name, email, password, birthAt }: CreateUserDTO) {
+    // async create({ name, email, password, birthAt }: CreateUserDTO) {
+
+    //     const salt = await bcrypt.genSalt()
+    //     console.log("salt: ",salt)
+
+    //     password = await bcrypt.hash(password, salt)
+
+    //     return this.prisma.users.create({
+    //         data: {
+    //             name,
+    //             email,
+    //             password,
+    //             birthAt: birthAt ? new Date(birthAt) : null, 
+    //         },
+    //         select: {
+    //             id: true,
+    //             name: true,
+    //             email: true,
+    //             password: true,
+    //             birthAt: true,
+    //             role: true,
+    //             updatedAt: true,
+    //             createdAt: true,
+    //         },
+    //     });
+    // }
+    async create(data: CreateUserDTO) {
+
+        const salt = await bcrypt.genSalt()
+        data.password = await bcrypt.hash(data.password, salt)
+
         return this.prisma.users.create({
-            data: {
-                name,
-                email,
-                password,
-                birthAt: birthAt ? new Date(birthAt) : null, 
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                password: true,
-                birthAt: true,
-                updatedAt: true,
-                createdAt: true,
-            },
+            data,
         });
     }
     
@@ -50,6 +66,9 @@ export class UserService {
     async update(id: number, {name,email,password,birthAt}: UpdatePutUserDTO) {
         await this.exists(id)
 
+        const salt = await bcrypt.genSalt()
+        password = await bcrypt.hash(password, salt)
+
         return this.prisma.users.update({
             data:{
                 name,
@@ -67,21 +86,22 @@ export class UserService {
         await this.exists(id)
 
         const data: any = {};
-
+      
         if (data.birthAt){
             data.birthAt = new Date(data.birthAt)
-        }
-
+          }
+      
         if (data.name){
             data.name=name
-        }
-
+          }
+      
         if (data.email){
             data.email=email
-        }
-
+          }
+      
         if (password){
-            data.password=password
+            const salt = await bcrypt.genSalt()
+            data.password = await bcrypt.hash(password, salt)
         }
 
         return this.prisma.users.update({
@@ -90,8 +110,8 @@ export class UserService {
                 id
             }
         })
-    }
-
+    }      
+      
     async delete(id:number){
         await this.exists(id)
         

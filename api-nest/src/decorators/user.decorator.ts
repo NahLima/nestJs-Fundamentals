@@ -9,7 +9,7 @@ export const User = createParamDecorator((filter: string, context: ExecutionCont
         }
         return request.user;
     }else{
-        throw new NotFoundException('User não encontrado no request.')
+        throw new NotFoundException('User não encontrado no request. Use o AuthGuard para obter o usuário.')
     }
 
 });
